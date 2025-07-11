@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PsychoEnd</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background: black;
+    overflow: hidden;
+  }
+  .background {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 100%;
+    width: auto;
+    filter: grayscale(100%) brightness(0.8) contrast(1.1);
+    animation: creepyFlicker 3s infinite alternate,
+               continuousZoom 20s infinite ease-in-out;
+  }
+  @keyframes creepyFlicker {
+    0%   { filter: grayscale(100%) brightness(0.7) contrast(1.1); }
+    50%  { filter: grayscale(100%) brightness(1) contrast(1.4); }
+    100% { filter: grayscale(100%) brightness(0.6) contrast(1.2); }
+  }
+  @keyframes continuousZoom {
+    0%   { transform: translate(-50%, -50%) scale(1); }
+    50%  { transform: translate(-50%, -50%) scale(1.07); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+  }
+</style>
+</head>
+<body>
+<img src="./image.jpg" alt="Creepy Image" class="background">
+<audio id="bg-music" src="https://github.com/HumayunShariarHimu/PsychoEnd/raw/refs/heads/main/GloomySundaySuicideSong.mp3" autoplay loop hidden></audio>
+<script>
+  const bgMusic = document.getElementById('bg-music');
+  bgMusic.play().catch(() => {
+    console.log("Autoplay might be blocked; waiting for user interaction...");
+  });
+
+  // Binaural beats (gamma ~40Hz, ultra low volume)
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const freqLeft = 440;
+  const freqRight = freqLeft + 40;
+
+  const oscillatorLeft = audioCtx.createOscillator();
+  const oscillatorRight = audioCtx.createOscillator();
+
+  oscillatorLeft.frequency.value = freqLeft;
+  oscillatorRight.frequency.value = freqRight;
+
+  const gainNodeLeft = audioCtx.createGain();
+  const gainNodeRight = audioCtx.createGain();
+
+  gainNodeLeft.gain.value = 0.005;  // ultra low volume
+  gainNodeRight.gain.value = 0.005;
+
+  const pannerLeft = audioCtx.createStereoPanner();
+  pannerLeft.pan.value = -1;
+
+  const pannerRight = audioCtx.createStereoPanner();
+  pannerRight.pan.value = 1;
+
+  oscillatorLeft.connect(gainNodeLeft).connect(pannerLeft).connect(audioCtx.destination);
+  oscillatorRight.connect(gainNodeRight).connect(pannerRight).connect(audioCtx.destination);
+
+  oscillatorLeft.start();
+  oscillatorRight.start();
+
+  // fallback if autoplay blocked
+  window.addEventListener('click', () => {
+    audioCtx.resume().then(() => {
+      bgMusic.play();
+    });
+  });
+</script>
+</body>
+</html>
